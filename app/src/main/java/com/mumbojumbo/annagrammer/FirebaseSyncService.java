@@ -55,6 +55,11 @@ public class FirebaseSyncService implements OnCompleteListener<DocumentSnapshot>
             DocumentSnapshot documentSnapshot = task.getResult();
             if(documentSnapshot.exists()){
                 Log.d(TAG,"DocumentSnapshot data: "+documentSnapshot.getData());
+                List<String>anagrams = new ArrayList<>();
+                for(String anagram: documentSnapshot.getData().keySet()){
+                    anagrams.add(anagram);
+                }
+                this.anagrams.setValue(anagrams);
             }else{
                 Log.d(TAG,"No such document ");
             }
