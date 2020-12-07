@@ -29,6 +29,9 @@ public class FirebaseSyncService implements OnCompleteListener<DocumentSnapshot>
     private final FirebaseFirestore firebaseFirestore;
     private CollectionReference anagramsStore;
     private final DocumentReference docReference;
+    private final FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
+
     private final MutableLiveData<List<String>> anagrams;
 
     public static FirebaseSyncService getInstance(){
@@ -39,9 +42,17 @@ public class FirebaseSyncService implements OnCompleteListener<DocumentSnapshot>
     }
 
     private FirebaseSyncService() {
+
+        //FireStore....
         firebaseFirestore = FirebaseFirestore.getInstance();
         docReference = firebaseFirestore.collection("anagrams").document("anagrams");
         docReference.get().addOnCompleteListener(this);
+
+        //RealtimeDatabase
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("anagrammer-ba67e-default-rtdb");
+
         anagrams = new MutableLiveData<>();
     }
 

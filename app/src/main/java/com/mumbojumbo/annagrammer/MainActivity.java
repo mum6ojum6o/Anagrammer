@@ -6,20 +6,25 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.mumbojumbo.annagrammer.viewmodels.AnagramsViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements Observer <List<String>>{
+public class MainActivity extends AppCompatActivity implements Observer <List<String>>, View.OnClickListener{
 
     FirebaseSyncService syncService;
-    List<String> anagrams;
+    List<String> words;
     AnagramsViewModel anagramsViewModel;
-    EditText editText;
+    EditText searchWordEditText;
     RecyclerView recyclerView;
+    Button searchButton;
+    TextView searchTitletextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,8 +32,15 @@ public class MainActivity extends AppCompatActivity implements Observer <List<St
 
         syncService = FirebaseSyncService.getInstance();
         syncService.getAnagrams();
+        searchButton = (Button) findViewById(R.id.searchButton);
+        searchWordEditText = (EditText)findViewById(R.id.searchWord);
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        searchTitletextView = (TextView)findViewById(R.id.textView);
+        searchButton.setOnClickListener(this);
+
         setupViewModel();
-        anagramsViewModel.getAnagrams().observe(this,this);
+        anagramsViewModel.getWords().observe(this,this);
+
     }
 
     private void setupViewModel() {
@@ -40,9 +52,30 @@ public class MainActivity extends AppCompatActivity implements Observer <List<St
     @Override
     public void onChanged(List<String> anagramsFromFireStore) {
         if(anagramsFromFireStore != null ){
-            if(anagrams == null) anagrams = new ArrayList<>();
-            anagrams.clear();
-            anagrams.addAll(anagramsFromFireStore);
+            if(words == null) words = new ArrayList<>();
+            words.clear();
+            words.addAll(anagramsFromFireStore);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.searchButton:
+                validateAndInitiateAnagramSearch();
+                break;
+        }
+    }
+
+    private void validateAndInitiateAnagramSearch() {
+        if(searchWordEditText.getText() != null && searchWordEditText.getText().toString().length() >0){
+            anagramsViewModel.getAnagrams(searchWordEditText.getText().toString(), words).observe(this, new Observer<List<String>>() {
+                @Override
+                public void onChanged(List<String> strings) {
+                    //push to recyclerview.
+                    searchTitletextView.append(" "+strings.size()+" anagrams found!");
+                }
+            });
         }
     }
 }
